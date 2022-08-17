@@ -25,11 +25,10 @@ interface SongCache {
 class InterfaceSongCache implements SongCache{
 
     private Map<String, Integer> songs;
-    private ConcurrentHashMap<String, Integer> hm;
+
 
     public InterfaceSongCache(){
         this.songs = new HashMap<>();
-        hm = new ConcurrentHashMap<String, Integer>();
     }
 
     @Override
@@ -41,20 +40,6 @@ class InterfaceSongCache implements SongCache{
         }else{
             songs.put(songId, numPlays);
         }
-
-        /*
-        if(songId == null){
-            throw new IllegalArgumentException("songId cannot be null.");
-        }
-
-        if(numPlays < 0){
-            throw new IllegalArgumentException("Song cannot be played negative times.");
-        }
-
-        hm.computeIfAbsent(songId, k -> (0));
-        hm.computeIfPresent(songId, (k, v)-> v + numPlays);
-
-         */
     }
 
     @Override
@@ -69,14 +54,14 @@ class InterfaceSongCache implements SongCache{
     public List<String> getTopNSongsPlayed(int n) {
         List<String> result = new ArrayList<>();
 
-        if(n == 0 || songs == null || songs.isEmpty()){
+        if (n == 0 || songs == null || songs.isEmpty()) {
             return result;
         }
-        if(n > songs.size()){
+        if (n > songs.size()) {
             throw new IllegalArgumentException("The input is not appropriate with the size");
         }
 
-        PriorityQueue<String> pq = new PriorityQueue<String>((a,b)->{
+        PriorityQueue<String> pq = new PriorityQueue<String>((a, b) -> {
             Integer val1 = songs.get(a);
             Integer val2 = songs.get(b);
 
@@ -87,78 +72,44 @@ class InterfaceSongCache implements SongCache{
             return val2 - val1;
         });
 
-        while(n > 0){
-            result.add(pq.poll());
-            n--;
+        for(String str : songs.keySet()){
+            pq.add(str);
+            if(pq.size() > n){
+                pq.poll();
+            }
         }
-        return result;
+
+        for(String s : pq){
+            result.add(s);
+        }
+
+        List<String> descList = new ArrayList<>();
+        for(int i = 0; i < result.size(); i++){
+            descList.add(pq.poll());
+        }
+        return descList;
     }
 }
 
 
 public class HW1 {
-
-    public void cacheIsWorking() {
-        SongCache cache = new InterfaceSongCache();
-        cache.recordSongPlays("ID-1", 3);
-        cache.recordSongPlays("ID-1", 1);
-        cache.recordSongPlays("ID-2", 2);
-        cache.recordSongPlays("ID-3", 5);
-
-        /*
-        assertThat(cache.getPlaysForSong("ID-1"), is(4));
-        assertThat(cache.getPlaysForSong("ID-9"), is(-1));
-        assertThat(cache.getTopNSongsPlayed(2), contains("ID-3",
-                "ID-1"));
-        assertThat(cache.getTopNSongsPlayed(0), is(empty()));
-        */
-
-        assert cache.getPlaysForSong("ID-1") == 4;
-        assert cache.getPlaysForSong("ID-9") == -1;
-
-
-
-    }
-
     public static void main(String[] args) {
-        HW1 hw1 = new HW1();
-        hw1.cacheIsWorking();
 
         SongCache cache = new InterfaceSongCache();
         cache.recordSongPlays("ID-1", 3);
         cache.recordSongPlays("ID-1", 1);
         cache.recordSongPlays("ID-2", 2);
         cache.recordSongPlays("ID-3", 5);
-        cache.recordSongPlays("ID-33", 20);
-        cache.recordSongPlays("ID-19", 12);
-        cache.recordSongPlays("ID-3", 19);
+        cache.recordSongPlays("ID-4", 6);
+        cache.recordSongPlays("ID-5", 7);
 
-        for(int i = 0; i < 5; i++){
-            System.out.println(cache);
-        }
 
-        System.out.println("top 3 songs: " );
-        List<String> topSongs = cache.getTopNSongsPlayed(3);
+        System.out.println("The number of plays ID-1: " + cache.getPlaysForSong("ID-1"));
+        System.out.println("The number of plays ID-3: " + cache.getPlaysForSong("ID-3"));
 
-        Iterator<String> it = topSongs.iterator();
+        System.out.println("Top 2 song played "+ cache.getTopNSongsPlayed(2));
+        System.out.println("Top 4 song played "+ cache.getTopNSongsPlayed(4));
 
-        while(it.hasNext()){
-            String str = it.next();
-            System.out.println(str);
-        }
 
-        System.out.println("\ntop 10 songs: ");
-        List<String> topSongs2 = cache.getTopNSongsPlayed(10);
-
-        it = topSongs2.iterator();
-
-        while(it.hasNext()){
-            String str = it.next();
-            System.out.println(str);
-        }
-
-        System.out.println("\nTest getPlaysForSongs: ");
-        System.out.println(cache.getPlaysForSong("ID-3"));
-        System.out.println(cache.getPlaysForSong("ID-24"));
     }
 }
