@@ -1,0 +1,20 @@
+create table authors(
+   id int not NULL,
+   first varchar(20),
+   last varchar(20),
+   PRIMARY KEY(id)
+);
+create table books(
+    book_id int not NULL,
+    title varchar(20),
+    year int,
+    PRIMARY KEY(book_id),
+);
+
+create table bookDetails(
+    authorID int not NULL,
+    bookID int not NULL,
+    FOREIGN KEY (authorID) REFERENCES authors(id),
+    FOREIGN KEY (bookID) REFERENCES book(book_id),
+    PRIMARY KEY (authorID, bookID)
+);
